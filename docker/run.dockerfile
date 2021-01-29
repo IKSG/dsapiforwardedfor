@@ -20,12 +20,14 @@ RUN ln -s /usr/src/myapp/target/debug/libdsapiforwardedfor.so /opt/hcl/domino/no
 # Copy in our Domino server config
 COPY --chown=notes:notes notesdata/* /local/notesdata/
 
+EXPOSE 8880 1352 80 443 8889 8890
+
 ENV NOTESBIN="/opt/hcl/domino/notes/11000100/linux"
 ENV DEBUG="true"
 RUN mkdir /local/notesdata/keepconfig.d
 RUN chown notes:notes /local/notesdata/keepconfig.d
 
-EXPOSE 1352 8082
+EXPOSE 8082
 
 WORKDIR /local/notesdata
 USER notes
