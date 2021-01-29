@@ -1,8 +1,8 @@
-FROM rust:1.49.0
-
-RUN apt update && apt install -y llvm-dev libclang-dev clang
+FROM rikorose/gcc-cmake:gcc-10
 
 COPY --from=domino-docker:V1101_03212020prod /opt/hcl/domino/notes/latest/linux/libnotes.so /usr/local/lib64/
+COPY build-linux-inner.sh /
+RUN chmod +x /build-linux-inner.sh
 
 WORKDIR /usr/src/myapp
-ENTRYPOINT ["cargo", "build"]
+ENTRYPOINT ["/build-linux-inner.sh"]
