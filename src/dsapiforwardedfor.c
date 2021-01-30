@@ -32,6 +32,11 @@ static int enabled;
 int processRequest(FilterContext* context, FilterRawRequest* eventData);
 int startRequest(FilterContext* context);
 
+
+// *******************************************************************************
+// * DSAPI filter API
+// *******************************************************************************
+
 int FilterInit(FilterInitData* filterInitData) {
 	filterInitData->appFilterVersion = kInterfaceVersion;
 	filterInitData->eventFlags = kFilterRawRequest;
@@ -64,6 +69,10 @@ int HttpFilterProc(FilterContext* context, unsigned int eventType, void* eventDa
 			return kFilterNotHandled;
 	}
 }
+
+// *******************************************************************************
+// * Internal processing functions
+// *******************************************************************************
 
 int processRequest(FilterContext* context, FilterRawRequest* rawRequest) {
 
