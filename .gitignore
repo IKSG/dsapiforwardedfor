@@ -10,9 +10,6 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 
-# HCL Proprietary
-/thirdparty/notesapi/
-
 # Generated build files
 /build/
 /target/
