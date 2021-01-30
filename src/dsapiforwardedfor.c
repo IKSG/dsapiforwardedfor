@@ -6,70 +6,53 @@
 #include "addin.h"
 #include "dsapi.h"
 
-struct AllowedIP {
-	char* val;
-	struct AllowedIP* next;
-};
+#define ENV_SECRET "HTTPConnectorHeadersSecret"
+#define HEADER_SECRET "X-ConnectorHeaders-Secret"
 
-static char* ENV_PROXYIPS = "X_Forwarded_ProxyIPs";
-static struct AllowedIP* allowedIPs;
+char* WS_HEADERS[] = {
+	"$WSSP",
+	"$WSSN",
+	"$WSRU",
+	"$WSRH",
+	"$WSRA",
+	"$WSLA",
+	"$WSPR",
+	"$WSIS",
+	"$WSCC",
+	"$WSAT",
+	"$WSKS"
+};
+int WS_HEADERS_LEN = 11;
+
+static char secret[MAXENVVALUE];
+static int enabled;
 
 #define BUFFER_SIZE 4096
 
 int processRequest(FilterContext* context, FilterRawRequest* eventData);
+int startRequest(FilterContext* context);
 
 int FilterInit(FilterInitData* filterInitData) {
-	AddInLogMessageText("[X-Forwarded] FilterInit", 0);
 	filterInitData->appFilterVersion = kInterfaceVersion;
 	filterInitData->eventFlags = kFilterRawRequest;
-	strcpy(filterInitData->filterDesc, "X-Forwarded Support");
+	strcpy(filterInitData->filterDesc, "HTTPConnectorHeaders Secret Filter");
 
 	// Find our configured allowed proxies
-	char ipbuf[MAXENVVALUE];
-	if(!OSGetEnvironmentString(ENV_PROXYIPS, ipbuf, MAXENVVALUE)) {
-		AddInLogMessageText("[X-Forwarded] Unable to load IPs from %s environment variable", 0, ENV_PROXYIPS);
+	if(!OSGetEnvironmentString(ENV_SECRET, secret, MAXENVVALUE)) {
+		AddInLogMessageText("[HTTPConnectorHeadersSecret] Unable to headers secret from %s environment variable", 0, ENV_SECRET);
 		return kFilterNotHandled;
 	}
-	AddInLogMessageText("[X-Forwarded] Initializing with allowed IPs %s", 0, ipbuf);
-
-	char* p = strtok(ipbuf, ",");
-	struct AllowedIP* prev = NULL;
-	while(p) {
-		if(!prev) {
-			// Then start our new list
-			allowedIPs = (struct AllowedIP*)calloc(1, sizeof(struct AllowedIP));
-			allowedIPs->val = (char*)malloc(sizeof(char)*strlen(p));
-			strcpy(allowedIPs->val, p);
-			prev = allowedIPs;
-		} else {
-			// Then prev is something - work from there
-			struct AllowedIP* next = (struct AllowedIP*)calloc(1, sizeof(struct AllowedIP));
-			next->val = (char*)malloc(sizeof(char)*(strlen(p)+1));
-			strcpy(next->val, p);
-			prev->next = next;
-			prev = next;
-		}
-		p = strtok(NULL, ",");
-	}
+	enabled = strlen(secret) > 0;
 
 	return kFilterHandledEvent;
 }
 
 unsigned int TerminateFilter(unsigned int reserved) {
-	AddInLogMessageText("[X-Forwarded] TerminateFilter", 0);
-
-	struct AllowedIP* ip = allowedIPs;
-	while(ip) {
-		struct AllowedIP* target = ip;
-		ip = ip->next;
-		free(target);
-	}
-
 	return kFilterHandledEvent;
 }
 
 int HttpFilterProc(FilterContext* context, unsigned int eventType, void* eventData) {
-	if(!allowedIPs) {
+	if(!enabled) {
 		// Exit early
 		return kFilterNotHandled;
 	}
@@ -83,14 +66,26 @@ int HttpFilterProc(FilterContext* context, unsigned int eventType, void* eventDa
 }
 
 int processRequest(FilterContext* context, FilterRawRequest* rawRequest) {
-	AddInLogMessageText("[X-Forwarded] Handling kFilterRawRequest", 0);
 
 	char buf[256];
 	int errId;
-	context->GetServerVariable(context, "Remote_Addr", buf, 256, &errId);
-	AddInLogMessageText("Got host %s", 0, buf);
-	rawRequest->GetHeader(context, "X-Forwarded-For", buf, 256, &errId);
-	AddInLogMessageText("Got xff %s", 0, buf);
+	for(int i = 0; i < WS_HEADERS_LEN; i++) {
+		rawRequest->GetHeader(context, WS_HEADERS[i], buf, 256, &errId);
+		if(strlen(buf) > 0) {
+			// Check if the secret is present
+			rawRequest->GetHeader(context, HEADER_SECRET, buf, 256, &errId);
+			if(strcmp(secret, buf) == 0) {
+				// Then all is well - allow the authorized request
+			} else {
+				// Then this is unauthorized - declare that we'll handle the request and let it fall
+				//   off the edge of the world
+				context->ServerSupport(context, kOwnsRequest, NULL, NULL, 0, &errId);
+			}
+
+			// We're done here one way or another
+			return kFilterHandledEvent;
+		}
+	}
 
 	return kFilterHandledEvent;
 }
