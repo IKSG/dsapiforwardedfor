@@ -20,5 +20,7 @@ set(SOURCE_FILES
 	src/dsapiforwardedfor.c
 )
 
+
 add_library(dsapiforwardedfor SHARED ${SOURCE_FILES})
 target_link_libraries(dsapiforwardedfor notes pthread c m nsl resolv dl)
+set_property(TARGET dsapiforwardedfor PROPERTY C_STANDARD 99)
