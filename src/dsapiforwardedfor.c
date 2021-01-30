@@ -42,9 +42,9 @@ int FilterInit(FilterInitData* filterInitData) {
 	filterInitData->eventFlags = kFilterRawRequest;
 	strcpy(filterInitData->filterDesc, "HTTPConnectorHeaders Secret Filter");
 
-	// Find our configured allowed proxies
+	// Find our configured secret
 	if(!OSGetEnvironmentString(ENV_SECRET, secret, MAXENVVALUE)) {
-		AddInLogMessageText("[HTTPConnectorHeadersSecret] Unable to headers secret from %s environment variable", 0, ENV_SECRET);
+		AddInLogErrorText("[HTTPConnectorHeadersSecret] Unable to headers secret from %s environment variable", 0, ENV_SECRET);
 		return kFilterNotHandled;
 	}
 	enabled = strlen(secret) > 0;
