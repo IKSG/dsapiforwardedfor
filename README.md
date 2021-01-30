@@ -23,5 +23,5 @@ field of an active web site config or the server document.
 
 ## Building
 
-To build, copy the header files files from the `include` directory Notes/Domino C API Toolkit into the
+To build, copy the header files files from the `include` directory of the Notes/Domino C API Toolkit into the
 "thirdparty/notesapi" directory
