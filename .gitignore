@@ -12,7 +12,6 @@ _deps
 
 # HCL Proprietary
 /thirdparty/notesapi/
-/docker/notesdata/
 
 # Generated build files
 /build/

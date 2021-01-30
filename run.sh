@@ -4,9 +4,7 @@ set -e
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-./build-linux.sh
-
-docker build -f docker/run.dockerfile -t dsapiforwardedfor-run docker
+docker build -f docker/run.dockerfile -t dsapiforwardedfor-run .
 
 docker run \
 	-it \
