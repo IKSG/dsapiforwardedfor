@@ -85,7 +85,7 @@ int processRequest(FilterContext* context, FilterRawRequest* rawRequest) {
 
 	if(isWsRequest(context, rawRequest)) {
 		char buf[256];
-		int errId;
+		unsigned int errId;
 
 		// Check if the secret is present
 		rawRequest->GetHeader(context, HEADER_SECRET, buf, 256, &errId);
@@ -109,7 +109,7 @@ int processRequest(FilterContext* context, FilterRawRequest* rawRequest) {
  */
 BOOL isWsRequest(FilterContext* context, FilterRawRequest* rawRequest) {
 	char buf[256];
-	int errId;
+    unsigned int errId;
 	for(int i = 0; i < WS_HEADERS_LEN; i++) {
 		rawRequest->GetHeader(context, WS_HEADERS[i], buf, 256, &errId);
 		if(buf[0] != '\0') {
