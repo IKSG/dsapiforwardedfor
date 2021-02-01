@@ -46,7 +46,7 @@ int FilterInit(FilterInitData* filterInitData) {
 		AddInLogErrorText("[HTTPConnectorHeadersSecret] Unable to headers secret from %s environment variable", 0, ENV_SECRET);
 		return kFilterNotHandled;
 	}
-	enabled = strlen(secret) > 0;
+	enabled = secret[0] != '\0';
 
 	return kFilterHandledEvent;
 }
