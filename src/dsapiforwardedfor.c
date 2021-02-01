@@ -112,7 +112,7 @@ BOOL isWsRequest(FilterContext* context, FilterRawRequest* rawRequest) {
 	int errId;
 	for(int i = 0; i < WS_HEADERS_LEN; i++) {
 		rawRequest->GetHeader(context, WS_HEADERS[i], buf, 256, &errId);
-		if(strlen(buf) > 0) {
+		if(buf[0] != '\0') {
 			return TRUE;
 		}
 	}
