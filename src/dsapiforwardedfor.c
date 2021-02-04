@@ -43,7 +43,7 @@ int FilterInit(FilterInitData* filterInitData) {
 
 	// Find our configured secret
 	if(!OSGetEnvironmentString(ENV_SECRET, secret, MAXENVVALUE)) {
-		AddInLogErrorText("[HTTPConnectorHeadersSecret] Unable to headers secret from %s environment variable", 0, ENV_SECRET);
+		AddInLogErrorText("[HTTPConnectorHeadersSecret] Unable to read headers secret from %s environment variable", 0, ENV_SECRET);
 		return kFilterNotHandled;
 	}
 	enabled = secret[0] != '\0';
